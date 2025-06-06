@@ -1,0 +1,140 @@
+CREATE DATABASE Hospital;
+
+USE Hospital;
+
+CREATE TABLE Department (
+    ID_Department INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(100),
+    Opening_hours NVARCHAR(15)
+);
+
+CREATE TABLE Ward (
+    ID_Ward INT PRIMARY KEY IDENTITY(1,1),
+    Number_of_beds INT,
+    FloorW INT,
+    ID_Department INT,
+    FOREIGN KEY (ID_Department) REFERENCES Department(ID_Department)
+);
+
+CREATE TABLE Sick (
+    ID_Sick INT PRIMARY KEY IDENTITY(1,1),
+    Full_name NVARCHAR(100),
+    Gender NVARCHAR(15),
+    AddressS NVARCHAR(100),
+    Date_of_birth DATE,
+    Diagnosis NVARCHAR(100),
+    StatusS NVARCHAR(15),
+    ID_Ward INT,
+    FOREIGN KEY (ID_Ward) REFERENCES Ward(ID_Ward)
+);
+
+CREATE TABLE Post (
+    ID_Post INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(100)
+);
+
+CREATE TABLE Worker (
+    ID_Worker INT PRIMARY KEY IDENTITY(1,1),
+    Full_name NVARCHAR(100),
+    Telephone NVARCHAR(15),
+    Experience INT,
+    ID_Department INT,
+    ID_Post INT,
+    FOREIGN KEY (ID_Department) REFERENCES Department(ID_Department),
+    FOREIGN KEY (ID_Post) REFERENCES Post(ID_Post)
+);
+
+CREATE TABLE sick_worker (
+    ID_Sick INT,
+    ID_Worker INT,
+    PRIMARY KEY (ID_Sick, ID_Worker),
+    FOREIGN KEY (ID_Sick) REFERENCES Sick(ID_Sick),
+    FOREIGN KEY (ID_Worker) REFERENCES Worker(ID_Worker)
+);
+
+CREATE TABLE Qualification (
+    ID_Qualification INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(100)
+);
+
+CREATE TABLE worker_qual (
+    ID_Worker INT,
+    ID_Qualification INT,
+    PRIMARY KEY (ID_Worker, ID_Qualification),
+    FOREIGN KEY (ID_Worker) REFERENCES Worker(ID_Worker),
+    FOREIGN KEY (ID_Qualification) REFERENCES Qualification(ID_Qualification)
+);
+
+
+USE Hospital;
+
+INSERT INTO Department (Title, Opening_hours)
+VALUES 
+('Внутр. Органы', '8-19'),
+('Невролгия', '9-19'),
+('Пищ. Тракрт', '10-19'),
+('Кости', '8-18'),
+('Железы', '9-18');
+
+
+INSERT INTO Ward (Number_of_beds, FloorW, ID_Department)
+VALUES 
+(2, 1, 1),
+(1, 1, 2),
+(2, 1, 3),
+(2, 2, 4),
+(1, 2, 5);
+
+
+INSERT INTO Sick (Full_name, Gender, AddressS, Date_of_birth, Diagnosis, StatusS, ID_Ward)
+VALUES 
+('Максим Сергеевич Иванов', 'муж', 'ул. Тверская, д. 25, кв. 14', '1987-05-12', 'Пневмония', 'болен', 1),
+('Анна Викторовна Смирнова', 'жен', 'наб. реки Фонтанки, д. 64, кв. 3', '2003-11-23', 'Радикулит', 'болен', 2),
+('Дмитрий Алексеевич Кузнецов', 'муж', 'ул. Ленина, д. 45, кв. 22', '1974-08-07', 'Гастрит', 'болен', 3),
+('Елена Николаевна Петрова', 'жен', 'ул. Октябрьская, д. 18, кв. 7', '1999-02-14', 'Перелом запястья', 'болен', 4),
+('Алексей Дмитриевич Лебедев', 'муж', 'Курортный проспект, д. 30, кв. 11', '1965-09-30', 'Недостаточность надпочечников', 'болен', 5);
+
+
+INSERT INTO Post (Title)
+VALUES 
+('Врач'),
+('Медсестра'),
+('Главный врач'),
+('Санитар'),
+('Заместитель руководителя');
+
+
+INSERT INTO Worker (Full_name, Telephone, Experience, ID_Department, ID_Post)
+VALUES 
+('Ольга Владимировна Сергеева', '+79123456789', 20, 1, 3),
+('Татьяна Ивановна Морозова', '+79211234567', 3, 2, 1),
+('Андрей Петрович Николаев', '+79037654321', 7, 3, 1),
+('Михаил Андреевич Белов', '+79605551234', 12, 4, 3),
+('Екатерина Дмитриевна Захарова', '+79859876543', 5, 5, 1);
+
+
+INSERT INTO sick_worker (ID_Sick, ID_Worker)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
+
+
+INSERT INTO Qualification (Title)
+VALUES 
+('Терапевт'),
+('Невролог'),
+('Гастроэнтеролог'),
+('Травматолог-ортопед'),
+('Эндокринолог');
+
+
+INSERT INTO worker_qual (ID_Worker, ID_Qualification)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
