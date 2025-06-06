@@ -1,0 +1,68 @@
+CREATE VIEW PatientWards AS
+SELECT 
+    s.ID_Sick AS PatientID,
+    s.Full_name AS PatientName,
+    s.Diagnosis,
+    w.ID_Ward AS WardNumber,
+    w.FloorW AS Floor,
+    d.Title AS Department
+FROM Sick s
+JOIN Ward w ON s.ID_Ward = w.ID_Ward
+JOIN Department d ON w.ID_Department = d.ID_Department;
+GO
+
+SELECT * FROM PatientWards;
+
+> камиля кит:
+CREATE VIEW WardOccupancy AS
+SELECT 
+    w.ID_Ward AS WardNumber,
+    w.Number_of_beds AS TotalBeds,
+    COUNT(s.ID_Sick) AS OccupiedBeds,
+    w.Number_of_beds - COUNT(s.ID_Sick) AS FreeBeds,
+    d.Title AS Department
+FROM Ward w
+LEFT JOIN Sick s ON w.ID_Ward = s.ID_Ward
+JOIN Department d ON w.ID_Department = d.ID_Department
+GROUP BY w.ID_Ward, w.Number_of_beds, d.Title;
+GO
+
+SELECT * FROM WardOccupancy;
+
+CREATE VIEW Positions AS
+SELECT 
+    w.ID_Worker AS EmployeeID,
+    w.Full_name AS EmployeeName,
+    p.Title AS Position,
+    d.Title AS Department,
+    w.Experience
+FROM Worker w
+JOIN Post p ON w.ID_Post = p.ID_Post
+JOIN Department d ON w.ID_Department = d.ID_Department;
+GO
+
+SELECT * FROM Positions;
+
+CREATE VIEW DepWardCount AS
+SELECT 
+    d.ID_Department,
+    d.Title AS Department,
+    d.Opening_hours,
+    COUNT(w.ID_Ward) AS WardCount
+FROM Department d
+LEFT JOIN Ward w ON d.ID_Department = w.ID_Department
+GROUP BY d.ID_Department, d.Title, d.Opening_hours;
+GO
+
+SELECT * FROM DepWardCount
+
+CREATE VIEW PatientDiagnosis AS
+SELECT 
+    Diagnosis,
+    COUNT(ID_Sick) AS PatientCount,
+    STRING_AGG(Full_name, ', ') AS PatientsList
+FROM Sick
+GROUP BY Diagnosis;
+GO
+
+SELECT * FROM PatientDiagnosis
