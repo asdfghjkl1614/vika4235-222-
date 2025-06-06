@@ -1,0 +1,75 @@
+GO
+CREATE PROCEDURE AboutSick AS
+SELECT Full_name AS FIO, AddressS AS Adress, Date_of_birth, Diagnosis
+FROM Sick
+
+EXECUTE AboutSick
+
+
+GO
+CREATE PROCEDURE AddWard
+    @id INT,
+    @beds INT,
+    @floor INT,
+  @id_dep INT
+AS
+INSERT INTO Ward(ID_Ward, Number_of_beds, FloorW, ID_Department) 
+VALUES(@id, @beds, @floor, @id_dep)
+
+ 
+DECLARE @id INT,@beds INT;
+DECLARE @floor INT, @id_dep INT
+SET @id = 501
+SET @beds= 3
+SET @floor = 5
+SET @id_dep= 3
+EXEC AddWard @id, @beds, @floor, @id_dep
+ 
+SELECT * FROM Ward
+
+
+GO
+CREATE PROCEDURE GetExperience
+    @minExpir INT OUTPUT,
+    @maxExpir INT OUTPUT
+AS
+SELECT @minExpir = MIN(Experience), @maxExpir = MAX(Experience)
+FROM Worker
+
+DECLARE @minExpir INT, @maxExpir INT
+ 
+EXECUTE GetExperience @minExpir OUTPUT, @maxExpir OUTPUT
+ 
+PRINT 'Врач с наименьшим опытом ' + CONVERT(VARCHAR, @minExpir)
+PRINT 'Врач с наибольшим опытом ' + CONVERT(VARCHAR, @maxExpir)
+
+
+CREATE PROCEDURE PatientStatus
+    @patientId INT,
+    @newStatus NVARCHAR(15)
+AS
+BEGIN
+    UPDATE Sick
+    SET StatusS = @newStatus
+    WHERE ID_Sick = @patientId;
+END;
+
+EXEC PatientStatus 
+    @patientId = 1,
+    @newStatus = 'выписан';
+
+  select * from Sick
+  where ID_Sick=1
+
+GO
+CREATE PROCEDURE GetAvgEXp AS
+DECLARE @avgEXP INT
+SELECT @avgEXP = AVG(Experience)
+FROM Worker
+RETURN @avgEXP;
+
+
+DECLARE @result INT
+ 
+EXEC @result = GetAvgEXp
+PRINT 'Средний опыт врачей ' + CONVERT(VARCHAR, @result)
