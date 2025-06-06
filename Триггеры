@@ -1,0 +1,104 @@
+USE Hospital
+
+CREATE TRIGGER Sick_INSERT
+ON Sick
+AFTER INSERT
+AS
+BEGIN
+    PRINT 'Добавлен новый пациент!'
+    
+    SELECT 'Пациент: ' + Full_name + ', Диагноз: ' + Diagnosis + ', Палата: ' + CAST(ID_Ward AS NVARCHAR(10))
+    FROM inserted
+END
+
+INSERT INTO Sick (ID_Sick, Full_name, Gender, AddressS, Date_of_birth, Diagnosis, StatusS, ID_Ward)
+VALUES 
+(7, 'Иван Петрович Сидоров', 'муж', 'ул. Пушкина, д. 10, кв. 5', '1990-07-15', 'Грипп', 'болен', 101);
+
+CREATE TRIGGER Worker_Phone
+ON Worker
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM inserted 
+        WHERE Telephone NOT LIKE '+7%' AND Telephone NOT LIKE '8%'
+    )
+    BEGIN
+        PRINT 'Ошибка: Телефон должен начинаться с +7 или 8';
+        ROLLBACK TRANSACTION;
+    END;
+END;
+
+INSERT INTO Worker (ID_Worker, Full_name, Telephone, Experience, ID_Department, ID_Post)
+VALUES (6, 'Дмитрий Петрович Семенов', '1234567890', 7, 3, 1);
+
+
+CREATE TRIGGER Check_Ward
+ON Sick
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @WardID INT, @CurrentPatients INT, @MaxBeds INT
+    
+    SELECT @WardID = ID_Ward FROM inserted
+    
+    SELECT @CurrentPatients = COUNT(*) 
+    FROM Sick 
+    WHERE ID_Ward = @WardID
+    
+    SELECT @MaxBeds = Number_of_beds 
+    FROM Ward 
+    WHERE ID_Ward = @WardID
+    
+    IF @CurrentPatients > @MaxBeds
+    BEGIN
+        PRINT 'Ошибка: В палате нет свободных мест';
+        ROLLBACK TRANSACTION;
+    END;
+END;
+
+
+INSERT INTO Sick (ID_Sick, Full_name, Gender, AddressS, Date_of_birth, Diagnosis, StatusS, ID_Ward)
+VALUES (8, 'Дмитрий Викторович Орлов', 'муж', 'пр. Ленина, 33', '1988-11-05', 'Ангина', 'болен', 102);
+
+
+CREATE TRIGGER Check_Patient_Age
+ON Sick
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM inserted 
+        WHERE DATEDIFF(YEAR, Date_of_birth, GETDATE()) < 0
+    )
+    BEGIN
+        RAISERROR('Ошибка: Некорректная дата рождения', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+
+INSERT INTO Sick (ID_Sick, Full_name, Gender, AddressS, Date_of_birth, Diagnosis, StatusS, ID_Ward)
+VALUES (15, 'Анна Викторовна Будущая', 'жен', 'ул. Мира, 20', '2050-01-01', 'Ангина', 'болен', 103);
+
+
+CREATE TRIGGER Ward_Floor
+ON Ward
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM inserted 
+        WHERE FloorW NOT BETWEEN 1 AND 5
+    )
+    BEGIN
+        PRINT 'Ошибка: Этаж палаты должен быть между 1 и 5';
+        ROLLBACK TRANSACTION;
+    END
+END;
+
+INSERT INTO Ward (ID_Ward, Number_of_beds, FloorW, ID_Department)
+VALUES (203, 2, 3, 1);
+
+INSERT INTO Ward (ID_Ward, Number_of_beds, FloorW, ID_Department)
+VALUES (204, 1, 0, 2);
